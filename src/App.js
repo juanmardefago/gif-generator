@@ -1,25 +1,34 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import Circle from './Circle.js'
 
 class App extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      delays: [0, 200, 400],
+      progressStep: 0.085
+    }
+  }
+
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div>
+        <Circle
+          color="red"
+          delay={this.state.delays[0]}
+          progressStep={this.state.progressStep}
+        />
+        <Circle
+          color="blue"
+          delay={this.state.delays[1]}
+          progressStep={this.state.progressStep}
+        />
+        <Circle
+          color="green"
+          delay={this.state.delays[2]}
+          progressStep={this.state.progressStep}
+        />
       </div>
     );
   }
