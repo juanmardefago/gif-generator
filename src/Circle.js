@@ -7,13 +7,17 @@ class Circle extends Component {
   static propTypes = {
     color: PropTypes.string,
     delay: PropTypes.number,
-    progressStep: PropTypes.number
+    progressStep: PropTypes.number,
+    playAnimation: PropTypes.bool,
+    singleRun: PropTypes.bool
   }
 
   static defaultProps = {
     color: 'grey',
     delay: 0,
-    progressStep: 0.05
+    progressStep: 0.05,
+    playAnimation: false,
+    singleRun: false
   }
 
   constructor(props) {
@@ -32,15 +36,15 @@ class Circle extends Component {
       alphaIncrease: true,
       progressStep: 0.05,
       alphaProgress: 0,
-      width,
-      height,
       radius,
       centerX,
       alphaCycleDelay: 50,
-      alphaCycleRetryDelay: 200
+      alphaCycleRetryDelay: 200,
+      firstTime: true,
+      pauseTimeout: null
     }
 
-    setTimeout(() => this.alphaCycle(), this.props.delay)
+    this.alphaCycleStarter()
   }
 
   fillColor() {
@@ -59,30 +63,56 @@ class Circle extends Component {
     context.fill();
   }
 
-  alphaCycle() {
-    if(this.canvasRef.current !== null) {
-      setTimeout(() => {
-        let localProgress = this.state.alphaProgress;
-        let increase = this.state.alphaIncrease;
-        if(localProgress <= 0) {
-          increase = true
-        } else if (localProgress >= 1){
-          increase = false
-        }
-        localProgress = increase ? localProgress + this.props.progressStep : localProgress - this.props.progressStep;
-        const localAlpha = this.easing(localProgress);
-        this.setState({
-          alpha: localAlpha, alphaIncrease: increase, alphaProgress: localProgress
-        }, () => {
+  alphaCycle(delay) {
+    setTimeout(() => {
+      let localProgress = this.state.alphaProgress;
+      let increase = this.state.alphaIncrease;
+      if(localProgress <= 0) {
+        increase = true
+      } else if (localProgress >= 1 && !this.props.singleRun){
+        increase = false
+      }
+      localProgress = increase ? localProgress + this.props.progressStep : localProgress - this.props.progressStep;
+      const localAlpha = this.easing(localProgress);
+      this.setState({
+        alpha: localAlpha, alphaIncrease: increase, alphaProgress: localProgress
+      }, () => {
+        if(this.props.playAnimation) {
           this.fillColor()
           console.log("Alpha: " + localAlpha)
           console.log("Progress: " + localProgress)
           this.alphaCycle();
+        } else {
+          this.alphaCycleStarter();
+        }
+      })
+    }, delay ? delay : this.state.alphaCycleDelay)
+  }
+
+  alphaCycleStarter() {
+    if(this.props.playAnimation && this.canvasRef.current !== null) {
+      if(this.state.firstTime) {
+        this.setState({
+          firstTime: false
+        }, () => {
+          this.alphaCycle(this.props.delay)
         })
-      }, this.state.alphaCycleDelay)
+      } else {
+        this.alphaCycle()
+      }
     } else {
-      setTimeout(() => this.alphaCycle(), this.state.alphaCycleRetryDelay)
+      setTimeout(() => this.alphaCycleStarter(), this.state.alphaCycleRetryDelay)
     }
+  }
+
+  resetAnimation() {
+    this.setState({
+      alpha: 0,
+      alphaProgress: 0,
+      firstTime: true
+    }, () => {
+      this.fillColor()
+    })
   }
 
   render() {
