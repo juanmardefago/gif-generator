@@ -9,7 +9,8 @@ class Circle extends Component {
     delay: PropTypes.number,
     progressStep: PropTypes.number,
     playAnimation: PropTypes.bool,
-    singleRun: PropTypes.bool
+    singleRun: PropTypes.bool,
+    onSingleRunDone: PropTypes.func
   }
 
   static defaultProps = {
@@ -17,7 +18,8 @@ class Circle extends Component {
     delay: 0,
     progressStep: 0.05,
     playAnimation: false,
-    singleRun: false
+    singleRun: false,
+    onSingleRunDone: () => {}
   }
 
   constructor(props) {
@@ -39,9 +41,10 @@ class Circle extends Component {
       radius,
       centerX,
       alphaCycleDelay: 50,
-      alphaCycleRetryDelay: 200,
+      alphaCycleRetryDelay: 100,
       firstTime: true,
-      pauseTimeout: null
+      singleRunHalfDone: false,
+      singleRunFinished: false
     }
 
     this.alphaCycleStarter()
@@ -67,20 +70,31 @@ class Circle extends Component {
     setTimeout(() => {
       let localProgress = this.state.alphaProgress;
       let increase = this.state.alphaIncrease;
+      let singleRunHalfDone = this.state.singleRunHalfDone;
+      let singleRunFinished = this.state.singleRunFinished;
       if(localProgress <= 0) {
         increase = true
-      } else if (localProgress >= 1 && !this.props.singleRun){
+        if(this.props.singleRun && this.state.singleRunHalfDone) {
+          singleRunFinished = true;
+          this.props.onSingleRunDone();
+        }
+      } else if (localProgress >= 1){
         increase = false
+        if(this.props.singleRun && !this.state.singleRunHalfDone) {
+          singleRunHalfDone = true;
+        }
       }
       localProgress = increase ? localProgress + this.props.progressStep : localProgress - this.props.progressStep;
       const localAlpha = this.easing(localProgress);
       this.setState({
-        alpha: localAlpha, alphaIncrease: increase, alphaProgress: localProgress
+        alpha: singleRunFinished ? 0 : localAlpha,
+        alphaIncrease: increase,
+        alphaProgress: singleRunFinished ? 0 : localProgress,
+        singleRunHalfDone: singleRunHalfDone,
+        singleRunFinished: singleRunFinished
       }, () => {
-        if(this.props.playAnimation) {
-          this.fillColor()
-          console.log("Alpha: " + localAlpha)
-          console.log("Progress: " + localProgress)
+        this.fillColor()
+        if(this.props.playAnimation && !this.state.singleRunFinished) {
           this.alphaCycle();
         } else {
           this.alphaCycleStarter();
@@ -90,7 +104,7 @@ class Circle extends Component {
   }
 
   alphaCycleStarter() {
-    if(this.props.playAnimation && this.canvasRef.current !== null) {
+    if(this.props.playAnimation && this.canvasRef.current !== null && !this.state.singleRunFinished) {
       if(this.state.firstTime) {
         this.setState({
           firstTime: false
@@ -109,7 +123,9 @@ class Circle extends Component {
     this.setState({
       alpha: 0,
       alphaProgress: 0,
-      firstTime: true
+      firstTime: true,
+      singleRunHalfDone: false,
+      singleRunFinished: false
     }, () => {
       this.fillColor()
     })

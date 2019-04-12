@@ -15,6 +15,8 @@ class App extends Component {
       progressStep: 0.085,
       color: "blue",
       playAnimation: false,
+      singleRun: false,
+      recording: false,
     }
   }
 
@@ -37,6 +39,42 @@ class App extends Component {
     this.circleRefs[2].current.resetAnimation()
   }
 
+  startRecordSingleRun = () => {
+    this.stopAnimation()
+    this.setState({
+      singleRun: true
+    }, () => {
+      this.startRecording();
+    })
+  }
+
+  startRecording = () => {
+    this.resetAnimation()
+    this.setState({
+      recording: true
+    }, () => {
+      this.startAnimation();
+    })
+  }
+
+  stopRecording = () => {
+    this.stopAnimation()
+    this.setState({
+      recording: false
+    }, () => {
+
+    })
+  }
+
+  onSingleRunDone = () => {
+    this.stopRecording();
+    this.setState({
+      singleRun: false
+    }, () => {
+      this.resetAnimation()
+    })
+  }
+
   render() {
     return (
       <div>
@@ -55,6 +93,25 @@ class App extends Component {
         >
           Reset
         </button>
+        <button
+          onClick={this.startRecordSingleRun}
+        >
+          Single run record
+        </button>
+        { !this.state.recording &&
+          <button
+            onClick={this.startRecording}
+          >
+            Start recording
+          </button>
+        }
+        { this.state.recording &&
+          <button
+            onClick={this.stopRecording}
+          >
+            Stop Recording
+          </button>
+        }
         <div ref={this.renderSpaceRef}>
           <Circle
             ref={this.circleRefs[0]}
@@ -62,6 +119,7 @@ class App extends Component {
             delay={this.state.delays[0]}
             progressStep={this.state.progressStep}
             playAnimation={this.state.playAnimation}
+            singleRun={this.state.singleRun}
           />
           <Circle
             ref={this.circleRefs[1]}
@@ -69,6 +127,7 @@ class App extends Component {
             delay={this.state.delays[1]}
             progressStep={this.state.progressStep}
             playAnimation={this.state.playAnimation}
+            singleRun={this.state.singleRun}
           />
           <Circle
             ref={this.circleRefs[2]}
@@ -76,6 +135,8 @@ class App extends Component {
             delay={this.state.delays[2]}
             progressStep={this.state.progressStep}
             playAnimation={this.state.playAnimation}
+            singleRun={this.state.singleRun}
+            onSingleRunDone={this.onSingleRunDone}
           />
         </div>
       </div>
