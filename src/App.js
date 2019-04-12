@@ -75,6 +75,12 @@ class App extends Component {
     })
   }
 
+  handleChange = (event) => {
+    this.setState({
+      color: event.target.value
+    })
+  }
+
   render() {
     return (
       <div>
@@ -112,6 +118,9 @@ class App extends Component {
             Stop Recording
           </button>
         }
+        <br/>
+        <input type="text" value={this.state.color} onChange={this.handleChange} />
+        <br/>
         <div ref={this.renderSpaceRef}>
           <Circle
             ref={this.circleRefs[0]}
