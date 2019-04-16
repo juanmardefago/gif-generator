@@ -5,18 +5,12 @@ import Circle from './Circle.js'
 class App extends Component {
   constructor(props) {
     super(props)
-    this.renderSpaceRef = React.createRef();
-    this.circleRefs = [];
-    this.circleRefs.push(React.createRef())
-    this.circleRefs.push(React.createRef())
-    this.circleRefs.push(React.createRef())
     this.state = {
-      delays: [0, 200, 400],
-      progressStep: 0.085,
-      color: "blue",
+      delays: [0, 0.4, 0.8],
+      progressStep: 0.05,
+      color: "#666666",
       playAnimation: false,
       singleRun: false,
-      recording: false,
     }
   }
 
@@ -32,37 +26,12 @@ class App extends Component {
     })
   }
 
-  resetAnimation = () => {
-    this.stopAnimation()
-    this.circleRefs[0].current.resetAnimation()
-    this.circleRefs[1].current.resetAnimation()
-    this.circleRefs[2].current.resetAnimation()
-  }
-
   startRecordSingleRun = () => {
     this.stopAnimation()
     this.setState({
       singleRun: true
     }, () => {
-      this.startRecording();
-    })
-  }
-
-  startRecording = () => {
-    this.resetAnimation()
-    this.setState({
-      recording: true
-    }, () => {
       this.startAnimation();
-    })
-  }
-
-  stopRecording = () => {
-    this.stopAnimation()
-    this.setState({
-      recording: false
-    }, () => {
-
     })
   }
 
@@ -71,13 +40,6 @@ class App extends Component {
     this.setState({
       singleRun: false
     }, () => {
-      this.resetAnimation()
-    })
-  }
-
-  handleChange = (event) => {
-    this.setState({
-      color: event.target.value
     })
   }
 
@@ -95,53 +57,14 @@ class App extends Component {
           Pause
         </button>
         <button
-          onClick={this.resetAnimation}
-        >
-          Reset
-        </button>
-        <button
           onClick={this.startRecordSingleRun}
         >
-          Single run record
+          Single run
         </button>
-        { !this.state.recording &&
-          <button
-            onClick={this.startRecording}
-          >
-            Start recording
-          </button>
-        }
-        { this.state.recording &&
-          <button
-            onClick={this.stopRecording}
-          >
-            Stop Recording
-          </button>
-        }
-        <br/>
-        <input type="text" value={this.state.color} onChange={this.handleChange} />
-        <br/>
-        <div ref={this.renderSpaceRef}>
+        <div>
           <Circle
-            ref={this.circleRefs[0]}
             color={this.state.color}
-            delay={this.state.delays[0]}
-            progressStep={this.state.progressStep}
-            playAnimation={this.state.playAnimation}
-            singleRun={this.state.singleRun}
-          />
-          <Circle
-            ref={this.circleRefs[1]}
-            color={this.state.color}
-            delay={this.state.delays[1]}
-            progressStep={this.state.progressStep}
-            playAnimation={this.state.playAnimation}
-            singleRun={this.state.singleRun}
-          />
-          <Circle
-            ref={this.circleRefs[2]}
-            color={this.state.color}
-            delay={this.state.delays[2]}
+            delays={this.state.delays}
             progressStep={this.state.progressStep}
             playAnimation={this.state.playAnimation}
             singleRun={this.state.singleRun}
